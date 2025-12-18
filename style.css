@@ -7,8 +7,8 @@
   --gradient-2: #74c0cf;
   --gradient-3: #b5e7e0;
   --gradient-4: #f4a261;
-  --text-main: #2c3e50;
-  --text-sub: #7f8c8d;
+  --text-main: #1a252f;
+  --text-sub: #546e7a;
   --card-bg: #ffffff;
   --success: #81c784;
   --success-light: #a5d6a7;
@@ -462,10 +462,10 @@ header p {
 .question-text {
   font-size: 1.35rem;
   line-height: 1.6;
-  font-weight: 500;
+  font-weight: 600;
   margin-top: 1.5rem;
   flex-grow: 1;
-  color: var(--text-main);
+  color: #1a252f;
 }
 
 .options-grid {
@@ -479,10 +479,10 @@ header p {
   padding: 14px 18px;
   background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
   border-radius: 14px;
-  color: #475569;
+  color: #2d3748;
   border: 2px solid transparent;
   transition: all 0.3s ease;
-  font-weight: 500;
+  font-weight: 600;
   cursor: pointer;
   user-select: none;
 }
@@ -570,8 +570,8 @@ header p {
 
 .answer-desc {
   font-size: 1.2rem;
-  color: var(--text-main);
-  font-weight: 600;
+  color: #1a252f;
+  font-weight: 700;
   max-width: 90%;
 }
 
