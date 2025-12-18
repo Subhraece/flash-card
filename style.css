@@ -1,15 +1,19 @@
 :root {
-  --primary: #7c3aed;
-  --primary-dark: #5b21b6;
-  --accent: #ec4899;
-  --accent-light: #f472b6;
-  --gradient-1: #667eea;
-  --gradient-2: #764ba2;
-  --gradient-3: #f093fb;
-  --gradient-4: #f5576c;
-  --text-main: #1e293b;
-  --text-sub: #64748b;
+  --primary: #5b9bd5;
+  --primary-dark: #4a8bc2;
+  --accent: #70c1b3;
+  --accent-light: #8ed1c6;
+  --gradient-1: #a8dadc;
+  --gradient-2: #74c0cf;
+  --gradient-3: #b5e7e0;
+  --gradient-4: #f4a261;
+  --text-main: #2c3e50;
+  --text-sub: #7f8c8d;
   --card-bg: #ffffff;
+  --success: #81c784;
+  --success-light: #a5d6a7;
+  --warning: #ffd54f;
+  --warning-light: #ffe082;
 }
 
 * {
@@ -357,12 +361,63 @@ header p {
   border: 2px solid transparent;
   transition: all 0.3s ease;
   font-weight: 500;
+  cursor: pointer;
+  user-select: none;
 }
 
-.option-item:hover {
-  background: linear-gradient(135deg, #e0e7ff 0%, #ddd6fe 100%);
+.option-item:hover:not(.option-disabled) {
+  background: linear-gradient(135deg, #e0f2fe 0%, #bae6fd 100%);
   border-color: var(--primary);
   transform: translateX(4px);
+}
+
+.option-item.option-correct {
+  background: linear-gradient(135deg, var(--success) 0%, var(--success-light) 100%);
+  border-color: var(--success);
+  color: white;
+  font-weight: 600;
+  animation: correctPulse 0.5s ease;
+}
+
+.option-item.option-wrong {
+  background: linear-gradient(135deg, var(--warning) 0%, var(--warning-light) 100%);
+  border-color: var(--warning);
+  color: #664d03;
+  font-weight: 600;
+  animation: wrongShake 0.5s ease;
+}
+
+.option-item.option-disabled {
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+@keyframes correctPulse {
+
+  0%,
+  100% {
+    transform: scale(1);
+  }
+
+  50% {
+    transform: scale(1.05);
+  }
+}
+
+@keyframes wrongShake {
+
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+
+  25% {
+    transform: translateX(-5px);
+  }
+
+  75% {
+    transform: translateX(5px);
+  }
 }
 
 .hint {

@@ -122,13 +122,21 @@ function renderCard() {
   document.getElementById("topic").innerText = q.Topic || "Nursing";
   document.getElementById("question").innerText = q.Question_Text;
 
-  const optionsHtml = `
-            <div class="option-item">A. ${q.Option_A}</div>
-            <div class="option-item">B. ${q.Option_B}</div>
-            <div class="option-item">C. ${q.Option_C}</div>
-            <div class="option-item">D. ${q.Option_D}</div>
-        `;
-  document.getElementById("options").innerHTML = optionsHtml;
+  const optionsContainer = document.getElementById("options");
+  optionsContainer.innerHTML = '';
+
+  // Create clickable options
+  const options = ['A', 'B', 'C', 'D'];
+  options.forEach(opt => {
+    const optionDiv = document.createElement('div');
+    optionDiv.className = 'option-item';
+    optionDiv.textContent = `${opt}. ${q[`Option_${opt}`]}`;
+    optionDiv.dataset.option = opt;
+
+    optionDiv.addEventListener('click', () => handleOptionClick(opt, q.Correct_Answer.trim()));
+
+    optionsContainer.appendChild(optionDiv);
+  });
 
   // Back side
   const correctKey = q.Correct_Answer.trim();
@@ -136,11 +144,36 @@ function renderCard() {
   document.getElementById("ansText").innerText =
     q[`Option_${correctKey}`];
 
-  document.getElementById("progress").innerText = `${index + 1} / ${data.length
-    }`;
+  document.getElementById("progress").innerText = `${index + 1} / ${data.length}`;
 
   document.getElementById("prevBtn").disabled = index === 0;
   document.getElementById("nextBtn").disabled = index === data.length - 1;
+}
+
+function handleOptionClick(selectedOption, correctOption) {
+  const allOptions = document.querySelectorAll('.option-item');
+
+  allOptions.forEach(opt => {
+    opt.classList.add('option-disabled');
+
+    if (opt.dataset.option === selectedOption) {
+      if (selectedOption === correctOption) {
+        opt.classList.add('option-correct');
+      } else {
+        opt.classList.add('option-wrong');
+      }
+    }
+
+    // Always show correct answer
+    if (opt.dataset.option === correctOption) {
+      opt.classList.add('option-correct');
+    }
+  });
+
+  // Auto-flip to show answer after 1.5 seconds
+  setTimeout(() => {
+    card.classList.add('is-flipped');
+  }, 1500);
 }
 
 card.addEventListener("click", () => {
