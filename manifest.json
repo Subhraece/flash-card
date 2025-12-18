@@ -1,20 +1,11 @@
 [
-  {
-    "filename": "questions-gnm.csv",
-    "title": "Questions Gnm",
-    "description": "Flashcards from questions-gnm.csv",
-    "icon": "\ud83d\udcda"
-  },
+  
   {
     "filename": "questions-gnm1.csv",
     "title": "Questions Gnm1",
     "description": "Flashcards from questions-gnm1.csv",
     "icon": "\ud83d\udcda"
-  },
-  {
-    "filename": "questions-gnm2.csv",
-    "title": "Questions Gnm2",
-    "description": "Flashcards from questions-gnm2.csv",
-    "icon": "\ud83d\udcda"
   }
+  
+
 ]
