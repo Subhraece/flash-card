@@ -245,5 +245,64 @@ document.addEventListener('touchend', (e) => {
   lastTouchEnd = now;
 }, { passive: false });
 
+// Header click - Return to CSV selection
+document.querySelector('header').addEventListener('click', () => {
+  if (!csvSelection.classList.contains('hidden')) return; // Already on selection screen
+
+  // Reset and show CSV selection
+  scene.style.display = 'none';
+  controls.style.display = 'none';
+  csvSelection.classList.remove('hidden');
+  data = [];
+  index = 0;
+});
+
+// Progress click - Show question list modal
+const questionModal = document.getElementById('questionModal');
+const questionGrid = document.getElementById('questionGrid');
+const closeModal = document.getElementById('closeModal');
+
+document.getElementById('progress').addEventListener('click', (e) => {
+  e.stopPropagation();
+  openQuestionModal();
+});
+
+function openQuestionModal() {
+  questionGrid.innerHTML = '';
+
+  for (let i = 0; i < data.length; i++) {
+    const questionNum = document.createElement('div');
+    questionNum.className = 'question-number';
+    questionNum.textContent = i + 1;
+
+    if (i === index) {
+      questionNum.classList.add('current');
+    }
+
+    questionNum.addEventListener('click', () => {
+      index = i;
+      renderCard();
+      closeQuestionModal();
+    });
+
+    questionGrid.appendChild(questionNum);
+  }
+
+  questionModal.classList.add('active');
+}
+
+function closeQuestionModal() {
+  questionModal.classList.remove('active');
+}
+
+closeModal.addEventListener('click', closeQuestionModal);
+
+// Close modal when clicking outside
+questionModal.addEventListener('click', (e) => {
+  if (e.target === questionModal) {
+    closeQuestionModal();
+  }
+});
+
 // Initialize - Render CSV selection on page load
 renderCSVSelection();
