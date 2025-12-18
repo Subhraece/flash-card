@@ -1,0 +1,850 @@
+<!DOCTYPE html>
+<html lang="bn">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Nursing GNM Flashcards</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
+  <style>
+    :root {
+      --primary: #7c3aed;
+      --primary-dark: #5b21b6;
+      --accent: #ec4899;
+      --accent-light: #f472b6;
+      --gradient-1: #667eea;
+      --gradient-2: #764ba2;
+      --gradient-3: #f093fb;
+      --gradient-4: #f5576c;
+      --text-main: #1e293b;
+      --text-sub: #64748b;
+      --card-bg: #ffffff;
+    }
+
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+      margin: 0;
+      padding: 0;
+    }
+
+    @keyframes gradientShift {
+      0% {
+        background-position: 0% 50%;
+      }
+
+      50% {
+        background-position: 100% 50%;
+      }
+
+      100% {
+        background-position: 0% 50%;
+      }
+    }
+
+    @keyframes fadeInDown {
+      from {
+        opacity: 0;
+        transform: translateY(-30px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes scaleIn {
+      from {
+        opacity: 0;
+        transform: scale(0.9);
+      }
+
+      to {
+        opacity: 1;
+        transform: scale(1);
+      }
+    }
+
+    @keyframes float {
+
+      0%,
+      100% {
+        transform: translateY(0px);
+      }
+
+      50% {
+        transform: translateY(-10px);
+      }
+    }
+
+    body {
+      font-family: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+      background: linear-gradient(135deg, var(--gradient-1) 0%, var(--gradient-2) 50%, var(--gradient-3) 100%);
+      background-size: 200% 200%;
+      animation: gradientShift 15s ease infinite;
+      color: var(--text-main);
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 20px;
+      position: relative;
+      overflow-x: hidden;
+    }
+
+    /* Decorative Background Elements */
+    body::before {
+      content: '';
+      position: fixed;
+      top: -50%;
+      right: -50%;
+      width: 100%;
+      height: 100%;
+      background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+      animation: float 6s ease-in-out infinite;
+      pointer-events: none;
+    }
+
+    body::after {
+      content: '';
+      position: fixed;
+      bottom: -50%;
+      left: -50%;
+      width: 100%;
+      height: 100%;
+      background: radial-gradient(circle, rgba(255, 255, 255, 0.08) 0%, transparent 70%);
+      animation: float 8s ease-in-out infinite reverse;
+      pointer-events: none;
+    }
+
+    /* Premium Header */
+    header {
+      text-align: center;
+      margin-bottom: 2.5rem;
+      animation: fadeInDown 0.8s ease;
+      position: relative;
+      z-index: 10;
+    }
+
+    header h1 {
+      font-size: clamp(2rem, 5vw, 3rem);
+      font-weight: 700;
+      letter-spacing: -0.03em;
+      margin: 0;
+      background: linear-gradient(135deg, #ffffff 0%, rgba(255, 255, 255, 0.8) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      text-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+      margin-bottom: 0.5rem;
+    }
+
+    header p {
+      color: rgba(255, 255, 255, 0.9);
+      font-size: 1rem;
+      font-weight: 400;
+    }
+
+    /* CSV Selection Screen */
+    .csv-selection {
+      width: 100%;
+      max-width: 900px;
+      margin-bottom: 2.5rem;
+      animation: fadeInUp 0.8s ease 0.2s both;
+      position: relative;
+      z-index: 10;
+    }
+
+    .selection-header {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+
+    .selection-header h2 {
+      font-size: clamp(1.5rem, 4vw, 2rem);
+      font-weight: 700;
+      color: white;
+      margin-bottom: 0.5rem;
+      letter-spacing: -0.02em;
+    }
+
+    .selection-header p {
+      color: rgba(255, 255, 255, 0.85);
+      font-size: 1rem;
+    }
+
+    .csv-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 20px;
+    }
+
+    .csv-card {
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-radius: 20px;
+      padding: 30px 25px;
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .csv-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 4px;
+      background: linear-gradient(90deg, var(--primary), var(--accent));
+      transition: left 0.3s ease;
+    }
+
+    .csv-card:hover {
+      transform: translateY(-8px) scale(1.02);
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.2);
+      border-color: rgba(124, 58, 237, 0.5);
+    }
+
+    .csv-card:hover::before {
+      left: 0;
+    }
+
+    .csv-card:active {
+      transform: translateY(-4px) scale(1.01);
+    }
+
+    .csv-icon {
+      font-size: 3rem;
+      margin-bottom: 15px;
+      display: block;
+    }
+
+    .csv-title {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--text-main);
+      margin-bottom: 8px;
+      line-height: 1.3;
+    }
+
+    .csv-description {
+      font-size: 0.9rem;
+      color: var(--text-sub);
+      line-height: 1.5;
+      margin-bottom: 12px;
+    }
+
+    .csv-count {
+      display: inline-block;
+      background: linear-gradient(135deg, var(--primary), var(--accent));
+      color: white;
+      padding: 4px 12px;
+      border-radius: 99px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+
+    .csv-selection.hidden {
+      display: none;
+    }
+
+    /* The Scene */
+    .scene {
+      width: 100%;
+      max-width: 450px;
+      height: 550px;
+      perspective: 1500px;
+      display: none;
+      animation: scaleIn 0.6s ease 0.4s both;
+      position: relative;
+      z-index: 10;
+    }
+
+    /* Enhanced Card */
+    .card {
+      width: 100%;
+      height: 100%;
+      position: relative;
+      transition: transform 0.7s cubic-bezier(0.4, 0, 0.2, 1);
+      transform-style: preserve-3d;
+      cursor: pointer;
+    }
+
+    .card.is-flipped {
+      transform: rotateY(180deg);
+    }
+
+    .card__face {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      backface-visibility: hidden;
+      display: flex;
+      flex-direction: column;
+      padding: 2.5rem;
+      border-radius: 28px;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25),
+        0 0 0 1px rgba(255, 255, 255, 0.1);
+      background: var(--card-bg);
+      border: 2px solid rgba(255, 255, 255, 0.8);
+      transition: all 0.3s ease;
+    }
+
+    .card__face:hover {
+      box-shadow: 0 30px 60px -15px rgba(0, 0, 0, 0.3);
+    }
+
+    /* Front Side */
+    .card__face--front {
+      justify-content: space-between;
+      background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+    }
+
+    .card__face--back {
+      background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+      transform: rotateY(180deg);
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+    }
+
+    .topic-badge {
+      align-self: flex-start;
+      background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+      color: white;
+      padding: 8px 18px;
+      border-radius: 99px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      box-shadow: 0 4px 12px rgba(124, 58, 237, 0.3);
+      animation: float 3s ease-in-out infinite;
+    }
+
+    .question-text {
+      font-size: 1.35rem;
+      line-height: 1.6;
+      font-weight: 500;
+      margin-top: 1.5rem;
+      flex-grow: 1;
+      color: var(--text-main);
+    }
+
+    .options-grid {
+      margin-top: 1.5rem;
+      display: grid;
+      gap: 12px;
+    }
+
+    .option-item {
+      font-size: 1rem;
+      padding: 14px 18px;
+      background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
+      border-radius: 14px;
+      color: #475569;
+      border: 2px solid transparent;
+      transition: all 0.3s ease;
+      font-weight: 500;
+    }
+
+    .option-item:hover {
+      background: linear-gradient(135deg, #e0e7ff 0%, #ddd6fe 100%);
+      border-color: var(--primary);
+      transform: translateX(4px);
+    }
+
+    .hint {
+      font-size: 0.85rem;
+      color: var(--text-sub);
+      text-align: center;
+      margin-top: 1.5rem;
+      font-weight: 500;
+      opacity: 0.8;
+    }
+
+    /* Back Side Styles */
+    .answer-circle {
+      width: 80px;
+      height: 80px;
+      background: linear-gradient(135deg, var(--gradient-4) 0%, var(--accent) 100%);
+      color: white;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2rem;
+      font-weight: 700;
+      margin-bottom: 1.5rem;
+      box-shadow: 0 10px 30px rgba(245, 87, 108, 0.4);
+      animation: float 3s ease-in-out infinite;
+    }
+
+    .answer-desc {
+      font-size: 1.2rem;
+      color: var(--text-main);
+      font-weight: 600;
+      max-width: 90%;
+    }
+
+    /* Enhanced Controls */
+    .controls {
+      margin-top: 3rem;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      gap: 2rem;
+      animation: fadeInUp 0.8s ease 0.6s both;
+      position: relative;
+      z-index: 10;
+    }
+
+    .nav-btn {
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(10px);
+      border: 2px solid rgba(255, 255, 255, 0.5);
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      color: var(--primary);
+    }
+
+    .nav-btn:hover:not(:disabled) {
+      transform: translateY(-4px) scale(1.05);
+      box-shadow: 0 12px 30px rgba(124, 58, 237, 0.3);
+      background: white;
+    }
+
+    .nav-btn:active:not(:disabled) {
+      transform: translateY(-2px) scale(1.02);
+    }
+
+    .nav-btn:disabled {
+      opacity: 0.3;
+      cursor: not-allowed;
+    }
+
+    #progress {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: white;
+      min-width: 80px;
+      text-align: center;
+      background: rgba(255, 255, 255, 0.2);
+      backdrop-filter: blur(10px);
+      padding: 12px 24px;
+      border-radius: 99px;
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    /* Mobile specific adjustments */
+    @media (max-width: 768px) {
+      body {
+        padding: 10px;
+        padding-bottom: 100px;
+        /* Space for bottom controls */
+      }
+
+      header {
+        margin-bottom: 1.5rem;
+      }
+
+      header h1 {
+        font-size: 1.8rem;
+      }
+
+      header p {
+        font-size: 0.9rem;
+      }
+
+      .upload-container {
+        padding: 20px;
+        margin-bottom: 1.5rem;
+      }
+
+      .upload-label {
+        font-size: 1rem;
+      }
+
+      input[type="file"] {
+        font-size: 0.85rem;
+        padding: 10px 15px;
+      }
+
+      input[type="file"]::file-selector-button {
+        padding: 6px 15px;
+        font-size: 0.85rem;
+      }
+
+      .scene {
+        height: calc(100vh - 280px);
+        max-height: 550px;
+        max-width: 100%;
+      }
+
+      .card__face {
+        padding: 1.5rem;
+      }
+
+      .topic-badge {
+        padding: 6px 14px;
+        font-size: 0.7rem;
+      }
+
+      .question-text {
+        font-size: 1.1rem;
+        margin-top: 1rem;
+      }
+
+      .options-grid {
+        margin-top: 1rem;
+        gap: 10px;
+      }
+
+      .option-item {
+        font-size: 0.95rem;
+        padding: 14px 16px;
+        border-radius: 12px;
+        /* Larger touch targets */
+        min-height: 48px;
+        display: flex;
+        align-items: center;
+      }
+
+      .answer-circle {
+        width: 70px;
+        height: 70px;
+        font-size: 1.8rem;
+      }
+
+      .answer-desc {
+        font-size: 1.1rem;
+      }
+
+      /* Bottom-fixed mobile controls */
+      .controls {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        margin: 0;
+        padding: 15px 20px;
+        padding-bottom: calc(15px + env(safe-area-inset-bottom));
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border-top: 1px solid rgba(255, 255, 255, 0.2);
+        box-shadow: 0 -8px 32px rgba(0, 0, 0, 0.1);
+        z-index: 100;
+        gap: 1.5rem;
+      }
+
+      .nav-btn {
+        width: 56px;
+        height: 56px;
+        /* Better touch target */
+        min-width: 56px;
+        min-height: 56px;
+      }
+
+      .nav-btn svg {
+        width: 24px;
+        height: 24px;
+      }
+
+      #progress {
+        font-size: 1rem;
+        padding: 10px 20px;
+      }
+
+      .hint {
+        font-size: 0.8rem;
+        margin-top: 1rem;
+      }
+    }
+
+    /* Extra small devices */
+    @media (max-width: 360px) {
+      .card__face {
+        padding: 1.2rem;
+      }
+
+      .question-text {
+        font-size: 1rem;
+      }
+
+      .option-item {
+        font-size: 0.9rem;
+        padding: 12px 14px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <header>
+    <h1>🎓 StudyCards</h1>
+    <p>Master Your Knowledge with Interactive Flashcards</p>
+  </header>
+
+  <!-- CSV Selection Screen -->
+  <div class="csv-selection" id="csvSelection">
+    <div class="selection-header">
+      <h2>� Select Your Flashcard Set</h2>
+      <p>Choose a topic to start studying</p>
+    </div>
+    <div class="csv-grid" id="csvGrid">
+      <!-- CSV file cards will be generated here -->
+    </div>
+  </div>
+
+  <div class="scene" id="scene">
+    <div class="card" id="card">
+      <div class="card__face card__face--front">
+        <span class="topic-badge" id="topic">Topic</span>
+        <div class="question-text" id="question">Loading...</div>
+        <div class="options-grid" id="options"></div>
+        <div class="hint">Tap to see answer</div>
+      </div>
+      <div class="card__face card__face--back">
+        <div class="answer-circle" id="ansLabel">A</div>
+        <div class="answer-desc" id="ansText">Correct Option Text</div>
+        <div class="hint" style="margin-top: 2rem">Tap to flip back</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="controls" id="controls">
+    <button class="nav-btn" id="prevBtn">
+      <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+      </svg>
+    </button>
+    <span id="progress">0 / 0</span>
+    <button class="nav-btn" id="nextBtn">
+      <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+      </svg>
+    </button>
+  </div>
+
+  <script>
+    // CSV Configuration - Add your CSV files here
+    const availableCSVFiles = [
+      {
+        filename: 'questions-gnm.csv',
+        title: 'GNM Nursing Questions',
+        description: 'Comprehensive question bank for General Nursing & Midwifery students',
+        icon: '🏥',
+        questionCount: null // Will be auto-detected
+      },
+      // Add more CSV files here as needed
+      // Example:
+      // {
+      //   filename: 'anatomy-questions.csv',
+      //   title: 'Anatomy & Physiology',
+      //   description: 'Human anatomy and physiology flashcards',
+      //   icon: '🫀',
+      //   questionCount: null
+      // }
+    ];
+
+    let data = [];
+    let index = 0;
+
+    const card = document.getElementById("card");
+    const scene = document.getElementById("scene");
+    const controls = document.getElementById("controls");
+    const csvSelection = document.getElementById("csvSelection");
+    const csvGrid = document.getElementById("csvGrid");
+
+    // Generate CSV selection cards
+    function renderCSVSelection() {
+      csvGrid.innerHTML = '';
+
+      availableCSVFiles.forEach((csvFile, idx) => {
+        const csvCard = document.createElement('div');
+        csvCard.className = 'csv-card';
+        csvCard.style.animationDelay = `${idx * 0.1}s`;
+
+        csvCard.innerHTML = `
+          <span class="csv-icon">${csvFile.icon}</span>
+          <div class="csv-title">${csvFile.title}</div>
+          <div class="csv-description">${csvFile.description}</div>
+          ${csvFile.questionCount ? `<span class="csv-count">${csvFile.questionCount} Questions</span>` : ''}
+        `;
+
+        csvCard.addEventListener('click', () => {
+          loadCSVFile(csvFile.filename);
+        });
+
+        csvGrid.appendChild(csvCard);
+      });
+    }
+
+    // Load CSV file from server
+    function loadCSVFile(filename) {
+      fetch(filename)
+        .then(response => {
+          if (!response.ok) {
+            throw new Error(`Failed to load ${filename}`);
+          }
+          return response.text();
+        })
+        .then(csvText => {
+          Papa.parse(csvText, {
+            header: true,
+            skipEmptyLines: true,
+            complete: function (results) {
+              data = results.data;
+              if (data.length > 0) {
+                index = 0;
+                csvSelection.classList.add('hidden');
+                scene.style.display = "block";
+                controls.style.display = "flex";
+                renderCard();
+              } else {
+                alert('No data found in CSV file');
+              }
+            },
+            error: function (error) {
+              alert('Error parsing CSV: ' + error.message);
+            }
+          });
+        })
+        .catch(error => {
+          alert('Error loading CSV file: ' + error.message);
+        });
+    }
+
+    function renderCard() {
+      card.classList.remove("is-flipped");
+      const q = data[index];
+
+      document.getElementById("topic").innerText = q.Topic || "Nursing";
+      document.getElementById("question").innerText = q.Question_Text;
+
+      const optionsHtml = `
+                <div class="option-item">A. ${q.Option_A}</div>
+                <div class="option-item">B. ${q.Option_B}</div>
+                <div class="option-item">C. ${q.Option_C}</div>
+                <div class="option-item">D. ${q.Option_D}</div>
+            `;
+      document.getElementById("options").innerHTML = optionsHtml;
+
+      // Back side
+      const correctKey = q.Correct_Answer.trim();
+      document.getElementById("ansLabel").innerText = correctKey;
+      document.getElementById("ansText").innerText =
+        q[`Option_${correctKey}`];
+
+      document.getElementById("progress").innerText = `${index + 1} / ${data.length
+        }`;
+
+      document.getElementById("prevBtn").disabled = index === 0;
+      document.getElementById("nextBtn").disabled = index === data.length - 1;
+    }
+
+    card.addEventListener("click", () => {
+      card.classList.toggle("is-flipped");
+    });
+
+    document.getElementById("nextBtn").addEventListener("click", (e) => {
+      e.stopPropagation();
+      if (index < data.length - 1) {
+        index++;
+        renderCard();
+      }
+    });
+
+    document.getElementById("prevBtn").addEventListener("click", (e) => {
+      e.stopPropagation();
+      if (index > 0) {
+        index--;
+        renderCard();
+      }
+    });
+
+    // Mobile swipe gesture support
+    let touchStartX = 0;
+    let touchEndX = 0;
+    let touchStartY = 0;
+    let touchEndY = 0;
+
+    card.addEventListener('touchstart', (e) => {
+      touchStartX = e.changedTouches[0].screenX;
+      touchStartY = e.changedTouches[0].screenY;
+    }, { passive: true });
+
+    card.addEventListener('touchend', (e) => {
+      touchEndX = e.changedTouches[0].screenX;
+      touchEndY = e.changedTouches[0].screenY;
+      handleSwipe();
+    }, { passive: true });
+
+    function handleSwipe() {
+      const swipeThreshold = 50;
+      const deltaX = touchEndX - touchStartX;
+      const deltaY = touchEndY - touchStartY;
+
+      // Only handle horizontal swipes (ignore if too much vertical movement)
+      if (Math.abs(deltaY) > Math.abs(deltaX)) {
+        return; // This is likely a scroll
+      }
+
+      // Swipe left (next card)
+      if (deltaX < -swipeThreshold && index < data.length - 1) {
+        index++;
+        renderCard();
+      }
+      // Swipe right (previous card)
+      else if (deltaX > swipeThreshold && index > 0) {
+        index--;
+        renderCard();
+      }
+    }
+
+    // Prevent double-tap zoom on mobile
+    let lastTouchEnd = 0;
+    document.addEventListener('touchend', (e) => {
+      const now = Date.now();
+      if (now - lastTouchEnd <= 300) {
+        e.preventDefault();
+      }
+      lastTouchEnd = now;
+    }, { passive: false });
+
+    // Initialize - Render CSV selection on page load
+    renderCSVSelection();
+  </script>
+</body>
+
+</html>
