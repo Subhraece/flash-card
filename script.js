@@ -1,0 +1,216 @@
+// CSV Configuration - Add your CSV files here
+const availableCSVFiles = [
+  {
+    filename: 'questions-gnm.csv',
+    title: 'GNM Nursing Questions',
+    description: 'Comprehensive question bank for General Nursing & Midwifery students',
+    icon: '🏥',
+    questionCount: null // Will be auto-detected
+  },
+  // Add more CSV files here as needed
+  // Example:
+  // {
+  //   filename: 'anatomy-questions.csv',
+  //   title: 'Anatomy & Physiology',
+  //   description: 'Human anatomy and physiology flashcards',
+  //   icon: '🫀',
+  //   questionCount: null
+  // }
+];
+
+let data = [];
+let index = 0;
+
+const card = document.getElementById("card");
+const scene = document.getElementById("scene");
+const controls = document.getElementById("controls");
+const csvSelection = document.getElementById("csvSelection");
+const csvGrid = document.getElementById("csvGrid");
+
+// Generate CSV selection cards
+async function renderCSVSelection() {
+  csvGrid.innerHTML = '';
+
+  // Create cards with loading state first
+  availableCSVFiles.forEach((csvFile, idx) => {
+    const csvCard = document.createElement('div');
+    csvCard.className = 'csv-card';
+    csvCard.style.animationDelay = `${idx * 0.1}s`;
+    csvCard.dataset.filename = csvFile.filename;
+
+    csvCard.innerHTML = `
+      <span class="csv-icon">${csvFile.icon}</span>
+      <div class="csv-title">${csvFile.title}</div>
+      <div class="csv-description">${csvFile.description}</div>
+      <span class="csv-count">Loading...</span>
+    `;
+
+    csvCard.addEventListener('click', () => {
+      loadCSVFile(csvFile.filename);
+    });
+
+    csvGrid.appendChild(csvCard);
+  });
+
+  // Fetch question counts asynchronously
+  for (let i = 0; i < availableCSVFiles.length; i++) {
+    const csvFile = availableCSVFiles[i];
+    try {
+      const response = await fetch(csvFile.filename);
+      if (response.ok) {
+        const csvText = await response.text();
+        const lines = csvText.trim().split('\n');
+        const questionCount = Math.max(0, lines.length - 1); // Subtract header row
+
+        // Update the card with question count
+        const card = csvGrid.querySelector(`[data-filename="${csvFile.filename}"]`);
+        if (card) {
+          const countElement = card.querySelector('.csv-count');
+          countElement.textContent = `${questionCount} Questions`;
+        }
+      }
+    } catch (error) {
+      // If error, just show the card without count
+      const card = csvGrid.querySelector(`[data-filename="${csvFile.filename}"]`);
+      if (card) {
+        const countElement = card.querySelector('.csv-count');
+        countElement.textContent = 'Click to start';
+      }
+    }
+  }
+}
+
+// Load CSV file from server
+function loadCSVFile(filename) {
+  fetch(filename)
+    .then(response => {
+      if (!response.ok) {
+        throw new Error(`Failed to load ${filename}`);
+      }
+      return response.text();
+    })
+    .then(csvText => {
+      Papa.parse(csvText, {
+        header: true,
+        skipEmptyLines: true,
+        complete: function (results) {
+          data = results.data;
+          if (data.length > 0) {
+            index = 0;
+            csvSelection.classList.add('hidden');
+            scene.style.display = "block";
+            controls.style.display = "flex";
+            renderCard();
+          } else {
+            alert('No data found in CSV file');
+          }
+        },
+        error: function (error) {
+          alert('Error parsing CSV: ' + error.message);
+        }
+      });
+    })
+    .catch(error => {
+      alert('Error loading CSV file: ' + error.message);
+    });
+}
+
+function renderCard() {
+  card.classList.remove("is-flipped");
+  const q = data[index];
+
+  document.getElementById("topic").innerText = q.Topic || "Nursing";
+  document.getElementById("question").innerText = q.Question_Text;
+
+  const optionsHtml = `
+            <div class="option-item">A. ${q.Option_A}</div>
+            <div class="option-item">B. ${q.Option_B}</div>
+            <div class="option-item">C. ${q.Option_C}</div>
+            <div class="option-item">D. ${q.Option_D}</div>
+        `;
+  document.getElementById("options").innerHTML = optionsHtml;
+
+  // Back side
+  const correctKey = q.Correct_Answer.trim();
+  document.getElementById("ansLabel").innerText = correctKey;
+  document.getElementById("ansText").innerText =
+    q[`Option_${correctKey}`];
+
+  document.getElementById("progress").innerText = `${index + 1} / ${data.length
+    }`;
+
+  document.getElementById("prevBtn").disabled = index === 0;
+  document.getElementById("nextBtn").disabled = index === data.length - 1;
+}
+
+card.addEventListener("click", () => {
+  card.classList.toggle("is-flipped");
+});
+
+document.getElementById("nextBtn").addEventListener("click", (e) => {
+  e.stopPropagation();
+  if (index < data.length - 1) {
+    index++;
+    renderCard();
+  }
+});
+
+document.getElementById("prevBtn").addEventListener("click", (e) => {
+  e.stopPropagation();
+  if (index > 0) {
+    index--;
+    renderCard();
+  }
+});
+
+// Mobile swipe gesture support
+let touchStartX = 0;
+let touchEndX = 0;
+let touchStartY = 0;
+let touchEndY = 0;
+
+card.addEventListener('touchstart', (e) => {
+  touchStartX = e.changedTouches[0].screenX;
+  touchStartY = e.changedTouches[0].screenY;
+}, { passive: true });
+
+card.addEventListener('touchend', (e) => {
+  touchEndX = e.changedTouches[0].screenX;
+  touchEndY = e.changedTouches[0].screenY;
+  handleSwipe();
+}, { passive: true });
+
+function handleSwipe() {
+  const swipeThreshold = 50;
+  const deltaX = touchEndX - touchStartX;
+  const deltaY = touchEndY - touchStartY;
+
+  // Only handle horizontal swipes (ignore if too much vertical movement)
+  if (Math.abs(deltaY) > Math.abs(deltaX)) {
+    return; // This is likely a scroll
+  }
+
+  // Swipe left (next card)
+  if (deltaX < -swipeThreshold && index < data.length - 1) {
+    index++;
+    renderCard();
+  }
+  // Swipe right (previous card)
+  else if (deltaX > swipeThreshold && index > 0) {
+    index--;
+    renderCard();
+  }
+}
+
+// Prevent double-tap zoom on mobile
+let lastTouchEnd = 0;
+document.addEventListener('touchend', (e) => {
+  const now = Date.now();
+  if (now - lastTouchEnd <= 300) {
+    e.preventDefault();
+  }
+  lastTouchEnd = now;
+}, { passive: false });
+
+// Initialize - Render CSV selection on page load
+renderCSVSelection();
