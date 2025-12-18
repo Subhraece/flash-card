@@ -21,7 +21,18 @@
     <div class="selection-header">
       <h2>📚 Select Your Flashcard Set</h2>
       <p>Choose a topic to start studying</p>
+
+      <!-- New Dropdown Selection -->
+      <div class="select-container">
+        <select id="csvDropdown" class="csv-dropdown">
+          <option value="" disabled selected>Select a Topic...</option>
+        </select>
+        <button id="loadBtn" class="primary-btn">Start</button>
+      </div>
     </div>
+
+    <!-- Optional: Keep grid for visual fetching but maybe hide it if dropdown is preferred, 
+         or keep both. I will keep it as 'Suggestions' or just list below -->
     <div class="csv-grid" id="csvGrid">
       <!-- CSV file cards will be generated here -->
     </div>

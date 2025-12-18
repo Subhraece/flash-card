@@ -1,38 +1,44 @@
-// CSV Configuration - Add your CSV files here
-const availableCSVFiles = [
-  {
-    filename: 'questions-gnm.csv',
-    title: 'GNM Nursing Questions',
-    description: 'Comprehensive question bank for General Nursing & Midwifery students',
-    icon: '🏥',
-    questionCount: null // Will be auto-detected
-  },
-  // Add more CSV files here as needed
-  // Example:
-  // {
-  //   filename: 'anatomy-questions.csv',
-  //   title: 'Anatomy & Physiology',
-  //   description: 'Human anatomy and physiology flashcards',
-  //   icon: '🫀',
-  //   questionCount: null
-  // }
-];
-
-let data = [];
-let index = 0;
+// CSV Configuration
+let availableCSVFiles = [];
 
 const card = document.getElementById("card");
 const scene = document.getElementById("scene");
 const controls = document.getElementById("controls");
 const csvSelection = document.getElementById("csvSelection");
 const csvGrid = document.getElementById("csvGrid");
+const csvDropdown = document.getElementById("csvDropdown");
+const loadBtn = document.getElementById("loadBtn");
 
-// Generate CSV selection cards
+// Load Manifest and Initialize
+async function initApp() {
+  try {
+    const response = await fetch('manifest.json');
+    if (!response.ok) throw new Error('Manifest not found');
+    availableCSVFiles = await response.json();
+  } catch (error) {
+    console.warn('Could not load manifest.json, falling back to default.', error);
+    // Fallback if manifest is missing
+    availableCSVFiles = [
+      {
+        filename: 'questions-gnm.csv',
+        title: 'GNM Nursing Questions',
+        description: 'Comprehensive question bank',
+        icon: '🏥'
+      }
+    ];
+  }
+
+  renderCSVSelection();
+}
+
+// Generate CSV selection cards and Dropdown
 async function renderCSVSelection() {
   csvGrid.innerHTML = '';
+  csvDropdown.innerHTML = '<option value="" disabled selected>Select a Topic...</option>';
 
-  // Create cards with loading state first
+  // creating cards and dropdown options
   availableCSVFiles.forEach((csvFile, idx) => {
+    // 1. Create Grid Card
     const csvCard = document.createElement('div');
     csvCard.className = 'csv-card';
     csvCard.style.animationDelay = `${idx * 0.1}s`;
@@ -50,6 +56,12 @@ async function renderCSVSelection() {
     });
 
     csvGrid.appendChild(csvCard);
+
+    // 2. Add to Dropdown
+    const option = document.createElement('option');
+    option.value = csvFile.filename;
+    option.textContent = csvFile.title;
+    csvDropdown.appendChild(option);
   });
 
   // Fetch question counts asynchronously
@@ -62,23 +74,36 @@ async function renderCSVSelection() {
         const lines = csvText.trim().split('\n');
         const questionCount = Math.max(0, lines.length - 1); // Subtract header row
 
-        // Update the card with question count
+        // Update the card
         const card = csvGrid.querySelector(`[data-filename="${csvFile.filename}"]`);
         if (card) {
-          const countElement = card.querySelector('.csv-count');
-          countElement.textContent = `${questionCount} Questions`;
+          card.querySelector('.csv-count').textContent = `${questionCount} Questions`;
+        }
+
+        // Update dropdown text (optional)
+        const option = csvDropdown.querySelector(`option[value="${csvFile.filename}"]`);
+        if (option) {
+          option.textContent = `${csvFile.title} (${questionCount} Qs)`;
         }
       }
     } catch (error) {
-      // If error, just show the card without count
-      const card = csvGrid.querySelector(`[data-filename="${csvFile.filename}"]`);
-      if (card) {
-        const countElement = card.querySelector('.csv-count');
-        countElement.textContent = 'Click to start';
-      }
+      console.error(error);
     }
   }
 }
+
+// Dropdown "Start" Button Handler
+loadBtn.addEventListener('click', () => {
+  const selectedFile = csvDropdown.value;
+  if (selectedFile) {
+    loadCSVFile(selectedFile);
+  } else {
+    alert("Please select a topic first.");
+  }
+});
+
+// Initialize
+initApp();
 
 // Load CSV file from server
 function loadCSVFile(filename) {
@@ -304,5 +329,4 @@ questionModal.addEventListener('click', (e) => {
   }
 });
 
-// Initialize - Render CSV selection on page load
-renderCSVSelection();
+// Initialize handled by initApp() at the top
