@@ -548,11 +548,11 @@ header p {
     margin: 0;
     padding: 15px 20px;
     padding-bottom: calc(15px + env(safe-area-inset-bottom));
-    background: rgba(255, 255, 255, 0.95);
+    background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
-    border-top: 1px solid rgba(255, 255, 255, 0.2);
-    box-shadow: 0 -8px 32px rgba(0, 0, 0, 0.1);
+    border-top: 1px solid rgba(255, 255, 255, 0.3);
+    box-shadow: 0 -8px 32px rgba(0, 0, 0, 0.2);
     z-index: 100;
     gap: 1.5rem;
   }
@@ -563,6 +563,9 @@ header p {
     /* Better touch target */
     min-width: 56px;
     min-height: 56px;
+    background: white;
+    color: var(--primary);
+    border-color: white;
   }
 
   .nav-btn svg {
@@ -573,6 +576,9 @@ header p {
   #progress {
     font-size: 1rem;
     padding: 10px 20px;
+    background: rgba(255, 255, 255, 0.95);
+    color: var(--primary);
+    font-weight: 700;
   }
 
   .hint {
