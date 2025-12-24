@@ -11,8 +11,15 @@
     "title": "Questions Gnm",
     "description": "Flashcards from questions-gnm.csv",
     "icon": "\ud83d\udcda"
+  },
+  {
+    "filename": "questions-gnm3.csv",
+    "title": "Questions Gnm3",
+    "description": "Flashcards from questions-gnm3.csv",
+    "icon": "\ud83d\udcda"
   }
   
 
 ]
+
 
